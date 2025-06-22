@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookmarkAI_API", "BookmarkAI_API\BookmarkAI_API.csproj", "{C6BA96FB-3F7E-4772-9092-83086935B2BF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C6BA96FB-3F7E-4772-9092-83086935B2BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6BA96FB-3F7E-4772-9092-83086935B2BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6BA96FB-3F7E-4772-9092-83086935B2BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6BA96FB-3F7E-4772-9092-83086935B2BF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
