@@ -7,6 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Html2Markdown" Version="7.0.5.101-beta" />
+        <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
     </ItemGroup>
