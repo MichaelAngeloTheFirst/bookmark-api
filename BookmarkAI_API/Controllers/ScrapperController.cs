@@ -8,11 +8,11 @@ using HtmlAgilityPack;
 
 [ApiController]
 [Route("[controller]")]
-public class Scrapper : ControllerBase
+public class ScrapperController : ControllerBase
 {
     private readonly HttpClient _httpClient;
 
-        public Scrapper()
+        public ScrapperController()
         {
             _httpClient = new HttpClient();
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
