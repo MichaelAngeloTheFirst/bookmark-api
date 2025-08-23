@@ -3,7 +3,6 @@ namespace BookmarkAI_API.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Html2Markdown;
 using HtmlAgilityPack;
 
 [ApiController]
@@ -51,10 +50,10 @@ public class ScrapperController : ControllerBase
 
                 var cleanedHtml = doc.DocumentNode.OuterHtml;
 
-                var converter = new Converter();
-                var markdown = converter.Convert(cleanedHtml);
+                // var converter = new Converter();
+                // var markdown = converter.Convert(cleanedHtml);
 
-                return Content(markdown, "text/plain");
+                return Content(cleanedHtml, "text/plain");
             }
             catch
             {
@@ -69,7 +68,6 @@ public class ScrapperController : ControllerBase
                 var uri = new Uri(url);
                 var baseUrl = $"{uri.Scheme}://{uri.Host}";
                 var llmUrl = $"{baseUrl}/llms.txt";
-                Console.Out.WriteLine($"Checking llms.txt at: {llmUrl}");
                 var response = await _httpClient.GetAsync(llmUrl);
                 if (response.IsSuccessStatusCode)
                 {

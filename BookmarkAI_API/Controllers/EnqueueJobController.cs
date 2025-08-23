@@ -1,5 +1,6 @@
 using BookmarkAI_API.Contracts;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -9,18 +10,19 @@ namespace BookmarkAI_API.Controllers
     [Route("[controller]")]
     public class EnqueueJobController : ControllerBase
     {
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IBus _bus;
         
-        public EnqueueJobController(IPublishEndpoint publishEndpoint)
+        public EnqueueJobController(IBus bus)
         {
-            _publishEndpoint = publishEndpoint;
+            _bus = bus;
         }
 
         [HttpPost]
         [Route("")]
+        [Authorize]
         public async Task<IActionResult> EnqueueJob([FromBody] string data)
         {
-            await _publishEndpoint.Publish<IScrapperJob>(new
+            await _bus.Publish<IScrapperJob>(new
             {
                 Url = data
             });

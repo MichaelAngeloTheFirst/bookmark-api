@@ -2,5 +2,5 @@ namespace BookmarkAI_API.Contracts;
 
 public interface IScrapperJob
 {
-    string Url { get; set;  }
+    string Url { get; set; }
 }

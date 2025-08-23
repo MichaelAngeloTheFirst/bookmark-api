@@ -4,13 +4,16 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>5b615e01-e118-459a-b6b2-1eb369b5e814</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Html2Markdown" Version="7.0.5.101-beta" />
-        <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
+        <PackageReference Include="Clerk.BackendAPI" Version="0.10.0" />
+        <PackageReference Include="HtmlAgilityPack" Version="1.12.2" />
+        <PackageReference Include="Markdig" Version="0.41.3" />
         <PackageReference Include="MassTransit" Version="8.5.3-develop.2358" />
         <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.3-develop.2358" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
     </ItemGroup>

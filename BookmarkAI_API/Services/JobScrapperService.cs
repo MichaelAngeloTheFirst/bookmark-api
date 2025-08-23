@@ -1,3 +1,5 @@
+using Markdig;
+
 namespace BookmarkAI_API.Services;
 
 using System.Runtime.CompilerServices;
@@ -7,18 +9,20 @@ using BookmarkAI_API.Modules;
 public class JobScrapperService
 {
     private readonly Scrapper _scrapper;
+    private readonly HtmlConverter _htmlConverter;
 
-    public JobScrapperService(Scrapper scrapper)
+    public JobScrapperService(Scrapper scrapper, HtmlConverter htmlConverter)
     {
         _scrapper = scrapper;
+        _htmlConverter = htmlConverter;
     }
 
-    public async Task GetMarkdown(string url)
+    public async Task<string> GetMarkdown(string url)
     {
         Console.WriteLine($"Fetching and converting URL: {url}");
-        var markdown = await _scrapper.GetMarkdown(url);
-        Console.WriteLine(markdown);
+        var html = await _scrapper.GetHtml(url);
+        var markdown = _htmlConverter.ConvertHtmlToMarkdown(html);
         await Task.Delay(500);
-        return;
+        return markdown;
     }
 }

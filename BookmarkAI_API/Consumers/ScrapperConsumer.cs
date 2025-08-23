@@ -15,7 +15,12 @@ public class ScrapperConsumer : IConsumer<IScrapperJob>
     
     public async Task Consume(ConsumeContext<IScrapperJob> context)
     {
-        await _jobScrapperService.GetMarkdown(context.Message.Url);
+       var markdown = await _jobScrapperService.GetMarkdown(context.Message.Url);
+       Console.WriteLine($"Markdown for URL '{context.Message.Url}': {markdown}");
+       await context.Publish<IMarkdownCleaned>(new
+       {
+           markdown = markdown,
+       });
     }
     
     

@@ -3,8 +3,7 @@ namespace BookmarkAI_API.Modules;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Html2Markdown;
-using HtmlAgilityPack;
+
 
 
 
@@ -21,7 +20,7 @@ public class Scrapper
         _httpClient.DefaultRequestHeaders.Accept.ParseAdd("text/html,application/xhtml+xml,application/xml");
     }
 
-    public async Task<string> GetMarkdown(string url)
+    public async Task<string> GetHtml(string url)
     {
         if (string.IsNullOrWhiteSpace(url))
             throw new ArgumentException("URL is required.");
@@ -29,36 +28,17 @@ public class Scrapper
         var (llmExists, llmContent) = await CheckLlmTxtAsync(url);
         if (llmExists)
         {
-            // Use the content of llm.txt (for example, return it)
             return llmContent ?? string.Empty;
         }
-
-        Console.WriteLine("Need to fetch the site and convert to Markdown.");
-
+        
         try
         {
-            var html = await _httpClient.GetStringAsync(url);
-
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
-
-            // Remove all class attributes
-            foreach (var node in doc.DocumentNode.SelectNodes("//*[@class]") ?? new HtmlNodeCollection(null))
-            {
-                node.Attributes["class"].Remove();
-            }
-
-            var cleanedHtml = doc.DocumentNode.OuterHtml;
-
-            var converter = new Converter();
-            var markdown = converter.Convert(cleanedHtml);
-
-            return markdown;
+            var html = await _httpClient.GetStringAsync(url); 
+            return html;
         }
         catch (Exception ex)
         {
-            // Handle or rethrow exception as needed
-            throw new Exception($"Failed to fetch or convert: {ex.Message}", ex);
+            throw new Exception($"Failed to fetch with error {ex.Message}", ex);
         }
     }
 
@@ -69,7 +49,6 @@ public class Scrapper
             var uri = new Uri(url);
             var baseUrl = $"{uri.Scheme}://{uri.Host}";
             var llmUrl = $"{baseUrl}/llms.txt";
-            Console.Out.WriteLine($"Checking llms.txt at: {llmUrl}");
             var response = await _httpClient.GetAsync(llmUrl);
             if (response.IsSuccessStatusCode)
             {
