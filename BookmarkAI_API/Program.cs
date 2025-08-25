@@ -1,13 +1,18 @@
 using BookmarkAI_API.Consumers;
+using BookmarkAI_API.Data;
 using BookmarkAI_API.Services;
 using BookmarkAI_API.Modules;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
-using Microsoft.Extensions.Configuration;
-
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets<Program>();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -50,13 +55,21 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddAuthentication("Clerk")
+    .AddScheme<AuthenticationSchemeOptions, ClerkAuthHandler>("Clerk", null);
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 
 
 // MassTransit
 builder.Services.AddSingleton<JobScrapperService>();
-builder.Services.AddTransient<Scrapper>();
-builder.Services.AddTransient<HtmlConverter>();
+builder.Services.AddSingleton<Scrapper>();
+builder.Services.AddSingleton<HtmlConverter>();
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<BookmarkAI_API.Consumers.ScrapperConsumer>();
@@ -72,7 +85,7 @@ builder.Services.AddMassTransit(x =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline.k
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

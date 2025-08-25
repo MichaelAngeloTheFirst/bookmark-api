@@ -19,7 +19,6 @@ namespace BookmarkAI_API.Controllers
 
         [HttpPost]
         [Route("")]
-        [Authorize]
         public async Task<IActionResult> EnqueueJob([FromBody] string data)
         {
             await _bus.Publish<IScrapperJob>(new

@@ -1,9 +1,10 @@
 using Markdig;
+using System.Runtime.CompilerServices;
+using BookmarkAI_API.Modules;
 
 namespace BookmarkAI_API.Services;
 
-using System.Runtime.CompilerServices;
-using BookmarkAI_API.Modules;
+
 
 
 public class JobScrapperService

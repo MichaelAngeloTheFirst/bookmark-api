@@ -1,10 +1,8 @@
-namespace BookmarkAI_API.Modules;
-
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-
+namespace BookmarkAI_API.Modules;
 
 
 public class Scrapper

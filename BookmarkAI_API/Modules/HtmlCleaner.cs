@@ -1,6 +1,8 @@
+using HtmlAgilityPack;
+
 namespace BookmarkAI_API.Modules;
 
-using HtmlAgilityPack;
+
 public class HtmlCleaner
 {
     static string CleanHtml(string htmlContent)
