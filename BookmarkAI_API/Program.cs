@@ -1,3 +1,4 @@
+using System.Reflection;
 using BookmarkAI_API.Consumers;
 using BookmarkAI_API.Data;
 using BookmarkAI_API.Services;
@@ -7,14 +8,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using BookmarkAI_API.Mapping;
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+// builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddOpenApi();
-builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddEndpointsApiExplorer(); 
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "BookmarkAI API", Version = "v1" });

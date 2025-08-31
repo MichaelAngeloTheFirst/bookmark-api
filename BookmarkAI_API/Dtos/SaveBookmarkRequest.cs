@@ -1,6 +1,6 @@
 namespace BookmarkAI_API.Dtos;
 
-public class SaveUrlRequest
+public class SaveBookmarkRequest
 {
     public string Url { get; set; } = string.Empty;
 }
