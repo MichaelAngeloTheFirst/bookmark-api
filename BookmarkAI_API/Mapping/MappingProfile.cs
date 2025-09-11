@@ -13,5 +13,6 @@ public class MappingProfile : Profile
                 opt.MapFrom(src => src.BookmarkTags.Select(ut => ut.Tag.Name).ToList()));
 
         CreateMap<Tag, TagDto>();
+        CreateMap<Collection, CollectionDto>();
     }
 }

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,17 +21,16 @@ public class TagsController : ControllerBase
         _db = db;
         _mapper = mapper;
     }
-
-    // POST /api/tags/{urlId}/add
-    [HttpPost("{urlId}/add")]
-    public async Task<IActionResult> AddTag(int urlId, [FromBody] string tagName)
+    
+    [HttpPost("bookmarks/{bookmarkId}/tags")]
+    public async Task<IActionResult> AddTag(int bookmarkId, [FromBody] string tagName)
     {
-        var userUrl = await _db.Bookmark
+        var bookmark = await _db.Bookmark
             .Include(u => u.BookmarkTags)
             .ThenInclude(ut => ut.Tag)
-            .FirstOrDefaultAsync(u => u.BookmarkId == urlId);
+            .FirstOrDefaultAsync(u => u.BookmarkId == bookmarkId);
 
-        if (userUrl == null) return NotFound("URL not found");
+        if (bookmark == null) return NotFound("URL not found");
 
         var tag = await _db.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
         if (tag == null)
@@ -39,35 +39,63 @@ public class TagsController : ControllerBase
             _db.Tags.Add(tag);
         }
 
-        if (!userUrl.BookmarkTags.Any(ut => ut.Tag.Name == tagName))
+        if (!bookmark.BookmarkTags.Any(ut => ut.Tag.Name == tagName))
         {
-            userUrl.BookmarkTags.Add(new BookmarkTag { Bookmark = userUrl, Tag = tag });
+            bookmark.BookmarkTags.Add(new BookmarkTag { Bookmark = bookmark, Tag = tag });
             await _db.SaveChangesAsync();
         }
 
-        return Ok(new { urlId, tagName });
+        return Ok(new { bookmarkId, tagName });
     }
-
-    // GET /api/tags/{tagName}/urls
-    [HttpGet("{tagName}/urls")]
-    public async Task<IActionResult> GetUrlsForTag(string tagName, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    
+    [HttpDelete("bookmarks/{bookmarkId}/tags")]
+    public async Task<IActionResult> RemoveTagFromBookmark(int bookmarkId, [FromBody]string tagName)
     {
-        var tag = await _db.Tags
-            .Include(t => t.BookmarkTags)
-            .ThenInclude(ut => ut.Bookmark)
-            .FirstOrDefaultAsync(t => t.Name == tagName);
+        var bookmark = await _db.Bookmark
+            .Include(u => u.BookmarkTags)
+            .ThenInclude(ut => ut.Tag)
+            .FirstOrDefaultAsync(u => u.BookmarkId == bookmarkId);
 
-        if (tag == null) return NotFound("Tag not found");
+        if (bookmark == null) return NotFound("URL not found");
 
-        var totalCount = tag.BookmarkTags.Count;
+        var bookmarkTag = bookmark.BookmarkTags.FirstOrDefault(ut => ut.Tag.Name == tagName);
+        if (bookmarkTag != null)
+        {
+            bookmark.BookmarkTags.Remove(bookmarkTag);
+            await _db.SaveChangesAsync();
+        }
 
-        var urls = tag.BookmarkTags
+        return Ok(new { bookmarkId, tagName });
+    }
+    
+    
+    
+    [HttpGet("tags/{tagName}/bookmarks")]
+    public async Task<IActionResult> GetBookmarksForTag(string tagName, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                     ?? User.FindFirst("subject")?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized("User not found");
+        
+        var tagExists = await _db.Tags.AnyAsync(t => t.Name == tagName);
+        if (!tagExists)
+            return NotFound("Tag not found");
+        
+        var query = _db.BookmarkTags
+            .Where(bt => bt.Tag.Name == tagName && bt.Bookmark.UserId == userId)
+            .Select(bt => bt.Bookmark)
+            .OrderBy(b => b.Title); 
+
+        var totalCount = await query.CountAsync();
+
+        var bookmarks = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(ut => ut.Bookmark)
-            .ToList();
+            .ToListAsync();
 
-        var dtoList = _mapper.Map<List<BookmarkResponseDto>>(urls);
+        var dtoList = _mapper.Map<List<BookmarkResponseDto>>(bookmarks);
 
         return Ok(new
         {
@@ -75,27 +103,49 @@ public class TagsController : ControllerBase
             Page = page,
             PageSize = pageSize,
             TotalCount = totalCount,
-            Urls = dtoList
+            bookmarks = dtoList
         });
     }
+    
+    [HttpPost("tags/{tagName}")]
+    public async Task<IActionResult> AddTag(string tagName)
+    {
+        var existingTag = await _db.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+        if (existingTag != null)
+            return Conflict("Tag already exists");
 
-    // GET /api/tags
-    [HttpGet]
+        var tag = new Tag { Name = tagName };
+        _db.Tags.Add(tag);
+        await _db.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetAllTags), new { id = tag.TagId }, tag);
+    }
+    
+    
+    [HttpGet("tags")]
     public async Task<IActionResult> GetAllTags([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         var query = _db.Tags.OrderBy(t => t.Name);
 
         var totalCount = await query.CountAsync();
-        var tags = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
-        var dtoList = _mapper.Map<List<TagDto>>(tags);
+        var tags = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(t => new TagCountDto
+            {
+                TagId = t.TagId,
+                Name = t.Name,
+                UsageCount = t.BookmarkTags.Count 
+            })
+            .ToListAsync();
 
         return Ok(new
         {
             Page = page,
             PageSize = pageSize,
             TotalCount = totalCount,
-            Tags = dtoList
+            Tags = tags
         });
     }
 }
